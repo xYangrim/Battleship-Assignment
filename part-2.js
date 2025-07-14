@@ -4,42 +4,28 @@ let boardSize = 0;
 let shipsRemaining = 5;
 let pastAttacks = [];
 
-const ships = {
-  destroyer: {
-      name: "destroyer",
-      length: 2,
+const fleet = {
+  destroyer: 2,
+  submarine: 3,
+  cruiser: 3,
+  battleship: 4,
+  carrier: 5
+}
+
+const ships = Object.entries(fleet).reduce((acc, [key, value]) => {
+  return {
+    ...acc,
+    [key]: {
+      name: key,
+      length: value,
       position: [],
       hits: 0
-  },
-  submarine: {
-      name: "submarine",
-      length: 3,
-      position: [],
-      hits: 0
-  },
-  cruiser: {
-      name: "cruiser",
-      length: 3,
-      position: [],
-      hits: 0
-  },
-  battleship: {
-      name: "battleship",
-      length: 4,
-      position: [],
-      hits: 0
-  },
-  carrier: {
-      name: "carrier",
-      length: 5,
-      position: [],
-      hits: 0
+    }
   }
-};
+}, {})
 
  
 let shipNames = Object.keys(ships);
-
 
 function createBoardSize() {
   while(true) {
@@ -90,17 +76,20 @@ function placeShips(board) {
 }
 
 function isValidPlacement(board, startRow, startCol, length, direction) {
-  if (
-    (direction === 0 && startCol + length > boardSize) ||
-    (direction === 1 && startRow + length > boardSize)
-  ) {
+  const condition = (direction === 0 && startCol + length > boardSize) ||
+    (direction === 1 && startRow + length > boardSize);
+
+  if (condition) {
     return false;
   }
 
   for (let i = 0; i < length; i++) {
-    if (direction === 0 && board[startRow][startCol + i]) {
+    const conditionTwo = direction === 0 && board[startRow][startCol + i];
+    const conditionThree = direction === 1 && board[startRow + i][startCol];
+
+    if (conditionTwo) {
       return false; 
-    } else if (direction === 1 && board[startRow + i][startCol]) {
+    } else if (conditionThree) {
       return false; 
     }
   }
@@ -182,6 +171,8 @@ function endOfGame() {
        shipsRemaining = 5;
        pastAttacks = [];
        shipNames = Object.keys(ships);
+       Object.values(ships).map((ship) => ship.position = []);
+       Object.values(ships).map((ship) => ship.hits = 0)
       break;
     } else if (restartGame.toUpperCase() === 'N') {
       process.exit();
@@ -199,6 +190,7 @@ function playGame() {
     createBoardSize();
     let board = createBoard();
     placeShips(board);
+    console.log(Object.values(ships).map((item) => item.position));
     strikeTurn();
     endOfGame();
   }
